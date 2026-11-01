@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="kn"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#261469">
+<title>Quiz</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#eef4fa;color:#1a1a1a}
+.box{max-width:520px;margin:0 auto;padding:14px}
+h1{font-size:1.3rem;color:#261469;margin:6px 0}
+.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px #0002;margin-bottom:12px}
+button{display:block;width:100%;margin:7px 0;padding:12px;font-size:1rem;border:2px solid #261469;border-radius:10px;background:#fff;text-align:left}
+button.p{background:#261469;color:#fff;text-align:center}
+button.g{background:#2a9d4a;border-color:#2a9d4a;color:#fff;text-align:center}
+button.o{background:#f59e0b;border-color:#f59e0b;color:#fff;text-align:center}
+button.ok{background:#c8f0d0;border-color:#2a9d4a}button.bad{background:#f8d0d0;border-color:#c33}
+.r{margin-top:8px;padding:10px;background:#fff7d6;border-radius:8px}
+.row{display:flex;gap:8px;align-items:center}.row button{text-align:center}.tl{display:inline-block;width:auto;min-width:56px;margin:4px;font-size:1.5rem;text-align:center}.hide{display:none}.s{color:#555;font-size:.9rem}.b{font-weight:bold}
+</style></head><body><div class="box">
+<h1>🎓 Quiz</h1>
+<div class="card" id="home">
+<div class="b" id="st"></div><p class="s">ವಿಷಯ ಆರಿಸಿ:</p><div id="sb"></div>
+<button class="g" onclick="go('lesson')">📘 ಪಾಠ (5 ಪ್ರಶ್ನೆ, 3 ❤️)</button>
+<button class="o" onclick="go('test')">📝 ಟೆಸ್ಟ್ (10 ಪ್ರಶ್ನೆ, ಸಮಯ ಮಿತಿ)</button>
+<button class="p" onclick="go('speed')">⚡ ಸ್ಪೀಡ್ ಗೇಮ್ (60 ಸೆಕೆಂಡ್)</button>
+<button class="g" onclick="wgo()">🧩 ಪದ ಒಗಟು (ಅಕ್ಷರ ಜೋಡಿಸಿ)</button><p class="s b">ಇತ್ತೀಚಿನ ಫಲಿತಾಂಶ</p><div id="hs"></div></div>
+<div class="card hide" id="qz">
+<div class="s b" id="n"></div><h3 id="q"></h3><div class="row" id="ll"><button class="o" onclick="half()">50/50 (25🪙)</button><button class="o" onclick="skp()">⏭ ಸ್ಕಿಪ್ (50🪙)</button><span class="b" id="cn"></span></div><div id="o"></div>
+<div class="r hide" id="r"></div>
+<button class="p hide" id="nx" onclick="nxt()">ಮುಂದೆ ➜</button></div>
+<div class="card hide" id="wd"><div class="s b" id="wh"></div><h3>ಅಕ್ಷರಗಳನ್ನು ಜೋಡಿಸಿ ಪದ ಮಾಡಿ</h3><div id="sl"></div><hr><div id="pl"></div>
+<div class="row"><button class="o" onclick="whint()">💡 ಸೂಚನೆ (25🪙)</button><button class="o" onclick="wskip()">⏭ ಸ್ಕಿಪ್ (50🪙)</button></div>
+<div class="r hide" id="wm"></div><button class="p hide" id="wn" onclick="wnext()">ಮುಂದೆ ➜</button><button onclick="home()">🏠 ಮುಖಪುಟ</button></div>
+<div class="card hide" id="end"><h2 id="sc"></h2><p id="msg"></p>
+<button class="p" onclick="home()">🏠 ಮುಖಪುಟ</button></div>
+</div>
+<script>
+const SCI=[
+["ಸಸ್ಯಗಳು ಆಹಾರ ತಯಾರಿಸುವ ಕ್ರಿಯೆ ಯಾವುದು?",["ದ್ಯುತಿಸಂಶ್ಲೇಷಣೆ","ಉಸಿರಾಟ","ಬಾಷ್ಪವಿಸರ್ಜನೆ","ಜೀರ್ಣಕ್ರಿಯೆ"],0,"ಎಲೆಗಳು ಸೂರ್ಯನ ಬೆಳಕಿನಿಂದ ಆಹಾರ ತಯಾರಿಸುತ್ತವೆ."],
+["ನೀರಿನ ರಾಸಾಯನಿಕ ಸೂತ್ರ ಯಾವುದು?",["CO₂","H₂O","O₂","NaCl"],1,"ಎರಡು ಹೈಡ್ರೋಜನ್ ಮತ್ತು ಒಂದು ಆಮ್ಲಜನಕ ಪರಮಾಣು."],
+["ದೇಹದಲ್ಲಿ ರಕ್ತವನ್ನು ಪಂಪ್ ಮಾಡುವ ಅಂಗ ಯಾವುದು?",["ಮೂತ್ರಪಿಂಡ","ಶ್ವಾಸಕೋಶ","ಹೃದಯ","ಯಕೃತ್ತು"],2,"ಹೃದಯ ರಕ್ತವನ್ನು ದೇಹದಾದ್ಯಂತ ಹರಿಸುತ್ತದೆ."],
+["ಗಾಳಿಯಲ್ಲಿ ಅತಿ ಹೆಚ್ಚು ಇರುವ ಅನಿಲ ಯಾವುದು?",["ಆಮ್ಲಜನಕ","ಸಾರಜನಕ","ಇಂಗಾಲದ ಡೈಆಕ್ಸೈಡ್","ಹೈಡ್ರೋಜನ್"],1,"ಗಾಳಿಯಲ್ಲಿ ಸುಮಾರು 78% ಸಾರಜನಕ ಇದೆ."],
+["ಸೂರ್ಯ ಯಾವ ರೀತಿಯ ಆಕಾಶಕಾಯ?",["ಗ್ರಹ","ಉಪಗ್ರಹ","ನಕ್ಷತ್ರ","ಧೂಮಕೇತು"],2,"ಸೂರ್ಯ ಸ್ವಯಂ ಬೆಳಕು ಕೊಡುವ ನಕ್ಷತ್ರ."],
+["ಸೂರ್ಯನಿಂದ ಮೂರನೇ ಗ್ರಹ ಯಾವುದು?",["ಶುಕ್ರ","ಭೂಮಿ","ಮಂಗಳ","ಗುರು"],1,"ಕ್ರಮ: ಬುಧ, ಶುಕ್ರ, ಭೂಮಿ."],
+["ಧ್ವನಿ ಚಲಿಸಲು ಏನು ಬೇಕು?",["ಮಾಧ್ಯಮ (ಗಾಳಿ/ನೀರು)","ನಿರ್ವಾತ","ಬೆಳಕು","ಕತ್ತಲೆ"],0,"ಧ್ವನಿ ಕಂಪನವಾಗಿ ಮಾಧ್ಯಮದ ಮೂಲಕ ಹರಡುತ್ತದೆ."],
+["ಅತ್ಯಂತ ಗಟ್ಟಿ ನೈಸರ್ಗಿಕ ವಸ್ತು ಯಾವುದು?",["ಚಿನ್ನ","ಕಬ್ಬಿಣ","ವಜ್ರ","ಸ್ಫಟಿಕ"],2,"ವಜ್ರ ಇಂಗಾಲದ ಅತಿ ಗಟ್ಟಿ ರೂಪ."],
+["ಸಾಮಾನ್ಯ ಒತ್ತಡದಲ್ಲಿ ನೀರು ಕುದಿಯುವ ಬಿಂದು?",["50°C","100°C","0°C","150°C"],1,"ನೀರು 100°C ನಲ್ಲಿ ಕುದಿಯುತ್ತದೆ."],
+["ಜೀವಕೋಶದ ನಿಯಂತ್ರಣ ಕೇಂದ್ರ ಯಾವುದು?",["ಕೋಶಭಿತ್ತಿ","ಕೋಶಕೇಂದ್ರ","ರೈಬೋಸೋಮ್","ರಸದಾನಿ"],1,"ಕೋಶಕೇಂದ್ರ ಕೋಶದ ಎಲ್ಲಾ ಚಟುವಟಿಕೆ ನಿಯಂತ್ರಿಸುತ್ತದೆ."],
+["ವಿಟಮಿನ್ C ಕೊರತೆಯಿಂದ ಬರುವ ರೋಗ?",["ಸ್ಕರ್ವಿ","ರಿಕೆಟ್ಸ್","ರಾತ್ರಿಕುರುಡು","ಬೆರಿಬೆರಿ"],0,"ವಿಟಮಿನ್ C ಕೊರತೆ ಸ್ಕರ್ವಿ ತರುತ್ತದೆ."],
+["ವಿದ್ಯುತ್ ಪ್ರವಾಹದ ಏಕಮಾನ ಯಾವುದು?",["ವೋಲ್ಟ್","ಆಂಪಿಯರ್","ಓಮ್","ವ್ಯಾಟ್"],1,"ಪ್ರವಾಹವನ್ನು ಆಂಪಿಯರ್‌ನಲ್ಲಿ ಅಳೆಯುತ್ತಾರೆ."],
+["ಬೆಳಕು ಅತಿ ವೇಗವಾಗಿ ಚಲಿಸುವುದು ಎಲ್ಲಿ?",["ನೀರು","ಗಾಜು","ನಿರ್ವಾತ","ವಜ್ರ"],2,"ನಿರ್ವಾತದಲ್ಲಿ ಬೆಳಕಿಗೆ ಅಡ್ಡಿ ಇಲ್ಲ (ಸುಮಾರು 3 ಲಕ್ಷ ಕಿ.ಮೀ/ಸೆ)."],
+["ಆಮ್ಲವು ನೀಲಿ ಲಿಟ್ಮಸ್ ಅನ್ನು ಯಾವ ಬಣ್ಣಕ್ಕೆ ಬದಲಿಸುತ್ತದೆ?",["ಕೆಂಪು","ಹಸಿರು","ಹಳದಿ","ಕಪ್ಪು"],0,"ಆಮ್ಲ ನೀಲಿ ಲಿಟ್ಮಸ್ ಅನ್ನು ಕೆಂಪಾಗಿಸುತ್ತದೆ."],
+["ವಯಸ್ಕ ಮನುಷ್ಯನ ದೇಹದಲ್ಲಿ ಎಷ್ಟು ಮೂಳೆಗಳಿವೆ?",["106","206","306","156"],1,"ವಯಸ್ಕರಲ್ಲಿ 206 ಮೂಳೆಗಳಿವೆ."],
+["ಭೂಮಿಯ ನೈಸರ್ಗಿಕ ಉಪಗ್ರಹ ಯಾವುದು?",["ಮಂಗಳ","ಚಂದ್ರ","ಸೂರ್ಯ","ಶುಕ್ರ"],1,"ಚಂದ್ರ ಭೂಮಿಯನ್ನು ಸುತ್ತುತ್ತದೆ."],
+["ಹಾಲು ಮೊಸರಾಗುವುದು ಯಾವ ಬದಲಾವಣೆ?",["ಭೌತಿಕ","ರಾಸಾಯನಿಕ","ಯಾವುದೂ ಅಲ್ಲ","ತಾತ್ಕಾಲಿಕ"],1,"ಹೊಸ ವಸ್ತು ರೂಪುಗೊಳ್ಳುವುದರಿಂದ ಇದು ರಾಸಾಯನಿಕ ಬದಲಾವಣೆ."],
+["ದ್ಯುತಿಸಂಶ್ಲೇಷಣೆಯಲ್ಲಿ ಸಸ್ಯಗಳು ಬಿಡುಗಡೆ ಮಾಡುವ ಅನಿಲ?",["ಆಮ್ಲಜನಕ","ಹೈಡ್ರೋಜನ್","ಮೀಥೇನ್","ಸಾರಜನಕ"],0,"ಸಸ್ಯಗಳು ಆಮ್ಲಜನಕ ಹೊರಬಿಡುತ್ತವೆ."],
+["ಕಬ್ಬಿಣಕ್ಕೆ ತುಕ್ಕು ಹಿಡಿಯಲು ಏನು ಬೇಕು?",["ಗಾಳಿ ಮತ್ತು ತೇವಾಂಶ","ಕೇವಲ ಬೆಳಕು","ಶಾಖ ಮಾತ್ರ","ಕತ್ತಲೆ"],0,"ಆಮ್ಲಜನಕ ಮತ್ತು ನೀರಿನ ಸಂಪರ್ಕದಿಂದ ತುಕ್ಕು ಆಗುತ್ತದೆ."],
+["ಬಲದ ಏಕಮಾನ ಯಾವುದು?",["ಜೂಲ್","ನ್ಯೂಟನ್","ಪಾಸ್ಕಲ್","ವ್ಯಾಟ್"],1,"ಬಲವನ್ನು ನ್ಯೂಟನ್‌ನಲ್ಲಿ ಅಳೆಯುತ್ತಾರೆ."]];
+const MAT=[
+["12 × 8 = ?",["86","96","108","88"],1,"12 ಅನ್ನು 8 ಬಾರಿ ಕೂಡಿದರೆ 96."],
+["144 ರ ವರ್ಗಮೂಲ ಎಷ್ಟು?",["11","12","13","14"],1,"12 × 12 = 144."],
+["ತ್ರಿಕೋನದ ಒಳಕೋನಗಳ ಮೊತ್ತ?",["90°","180°","270°","360°"],1,"ಯಾವುದೇ ತ್ರಿಕೋನದಲ್ಲಿ ಮೊತ್ತ 180°."],
+["200 ರ 25% ಎಷ್ಟು?",["25","50","75","100"],1,"25% = ಕಾಲು ಭಾಗ, 200 ÷ 4 = 50."],
+["ಆಯತದ ವಿಸ್ತೀರ್ಣದ ಸೂತ್ರ?",["ಉದ್ದ + ಅಗಲ","ಉದ್ದ × ಅಗಲ","2(ಉದ್ದ + ಅಗಲ)","ಉದ್ದ ÷ ಅಗಲ"],1,"ವಿಸ್ತೀರ್ಣ = ಉದ್ದ × ಅಗಲ."],
+["7² = ?",["14","42","49","56"],2,"7 × 7 = 49."],
+["ಅತಿ ಚಿಕ್ಕ ಅವಿಭಾಜ್ಯ ಸಂಖ್ಯೆ?",["0","1","2","3"],2,"2 ಕ್ಕೆ 1 ಮತ್ತು 2 ಮಾತ್ರ ಭಾಜಕಗಳು."],
+["ವೃತ್ತದ ವ್ಯಾಸ = ?",["ತ್ರಿಜ್ಯ","2 × ತ್ರಿಜ್ಯ","ತ್ರಿಜ್ಯ²","π × ತ್ರಿಜ್ಯ"],1,"ವ್ಯಾಸ ತ್ರಿಜ್ಯದ ಎರಡರಷ್ಟು."],
+["1000 ರ 10% ಎಷ್ಟು?",["10","100","1000","10000"],1,"1000 ÷ 10 = 100."],
+["15 + 27 × 0 = ?",["0","15","27","42"],1,"ಮೊದಲು ಗುಣಾಕಾರ: 27 × 0 = 0, ನಂತರ 15 + 0."]];
+const SUBS={sci:{n:"🔬 ವಿಜ್ಞಾನ",q:SCI},mat:{n:"➕ ಗಣಿತ",q:MAT}};
+const $=id=>document.getElementById(id);
+let S={};try{S=JSON.parse(localStorage.getItem("kq")||"{}")}catch(e){}
+S.xp=S.xp||0;if(S.coins==null)S.coins=100;S.streak=S.streak||0;S.hist=S.hist||[];
+const save=()=>{try{localStorage.setItem("kq",JSON.stringify(S))}catch(e){}};
+let sub="sci",L=[],i=0,sc=0,hp=3,mode="",tm=0,iv=null,lock=false;
+const MN={lesson:"ಪಾಠ",test:"ಟೆಸ್ಟ್",speed:"ಸ್ಪೀಡ್"};
+const show=id=>["home","qz","wd","end"].forEach(x=>$(x).classList.toggle("hide",x!=id));
+const shuf=a=>{a=[...a];for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
+function home(){clearInterval(iv);show("home");
+$("st").textContent="🪙 "+S.coins+" · ⭐ "+S.xp+" XP · ಹಂತ "+(Math.floor(S.xp/100)+1)+" · 🔥 "+S.streak+" ದಿನ";
+$("sb").innerHTML="";Object.keys(SUBS).forEach(k=>{const b=document.createElement("button");
+b.textContent=SUBS[k].n;b.className=k==sub?"p":"";b.onclick=()=>{sub=k;home()};$("sb").appendChild(b)});
+$("hs").innerHTML=S.hist.slice(-5).reverse().map(h=>"<div class=s>"+h.d+" · "+h.m+" · "+h.s+"/"+h.n+"</div>").join("")||"<div class=s>ಇನ್ನೂ ಇಲ್ಲ</div>"}
+function go(m){mode=m;L=shuf(SUBS[sub].q);if(m=="lesson")L=L.slice(0,5);if(m=="test")L=L.slice(0,10);
+i=0;sc=0;hp=3;show("qz");if(m=="speed")timer(60);load()}
+function timer(t){clearInterval(iv);tm=t;hdr();iv=setInterval(()=>{tm--;hdr();
+if(tm<=0){clearInterval(iv);mode=="speed"?fin():pick(-1)}},1000)}
+function hdr(){if($("cn"))$("cn").textContent="🪙 "+S.coins;$("n").textContent=mode=="lesson"?"❤️".repeat(hp)+"  "+(i+1)+"/"+L.length:
+mode=="test"?(i+1)+"/"+L.length+"  ⏱ "+tm+"s":"✅ "+sc+"  ⏱ "+tm+"s"}
+function load(){lock=false;$("ll").style.display=mode=="speed"?"none":"flex";const q=L[i];hdr();$("q").textContent=q[0];$("r").classList.add("hide");$("nx").classList.add("hide");
+$("o").innerHTML="";q[1].forEach((t,k)=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>pick(k);$("o").appendChild(b)});
+if(mode=="test")timer(20)}
+function pick(k){if(lock)return;lock=true;const q=L[i],b=$("o").children;if(mode=="test")clearInterval(iv);
+for(let j=0;j<b.length;j++){b[j].disabled=true;if(j==q[2])b[j].classList.add("ok")}
+const ok=k==q[2];if(ok){sc++;S.coins+=5;save()}else{if(k>=0)b[k].classList.add("bad");if(mode=="lesson")hp--}
+hdr();if(mode=="speed"){setTimeout(nxt,500);return}
+$("r").textContent=(ok?"✅ ಸರಿ! ":k<0?"⏰ ಸಮಯ ಮುಗಿಯಿತು. ":"❌ ತಪ್ಪು. ")+q[3];
+$("r").classList.remove("hide");$("nx").classList.remove("hide");
+$("nx").textContent=(mode=="lesson"&&hp<=0)||i==L.length-1?"ಫಲಿತಾಂಶ ➜":"ಮುಂದೆ ➜"}
+function nxt(){if(mode=="speed"&&tm<=0)return;i++;if((mode=="lesson"&&hp<=0)||i>=L.length)fin();else load()}
+function fin(){clearInterval(iv);const xp=sc*10+(mode=="test"?5:0);S.xp+=xp;
+const td=new Date().toISOString().slice(0,10),yd=new Date(Date.now()-864e5).toISOString().slice(0,10);
+if(S.last!=td){S.streak=S.last==yd?S.streak+1:1;S.last=td}
+S.hist.push({d:td.slice(5),m:MN[mode],s:sc,n:mode=="speed"?sc:L.length});S.hist=S.hist.slice(-10);save();
+$("sc").textContent="ಅಂಕ: "+sc+(mode=="speed"?"":" / "+L.length);
+$("msg").textContent="+"+xp+" XP ⭐ · 🔥 "+S.streak+" ದಿನ"+(mode=="lesson"&&hp<=0?" · ❤️ ಮುಗಿದವು, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ!":"");
+show("end")}
+
+function pay(n){if(S.coins<n){alert("🪙 ನಾಣ್ಯಗಳು ಸಾಲದು. ಸರಿ ಉತ್ತರ ಕೊಟ್ಟು ಗಳಿಸಿ!");return false}S.coins-=n;save();return true}
+function half(){if(lock)return;const q=L[i],b=$("o").children;let w=[];
+for(let j=0;j<b.length;j++)if(j!=q[2]&&!b[j].disabled)w.push(j);if(w.length<2||!pay(25))return;
+shuf(w).slice(0,2).forEach(j=>{b[j].disabled=true;b[j].style.opacity=.3});hdr()}
+function skp(){if(lock||!pay(50))return;i++;if(i>=L.length)fin();else load()}
+const WD=[["ಕ|ನ್ನ|ಡ","ನಮ್ಮ ಭಾಷೆ"],["ಪು|ಸ್ತ|ಕ","ಓದಲು ಬಳಸುವುದು"],["ಬೆಂ|ಗ|ಳೂ|ರು","ಕರ್ನಾಟಕದ ರಾಜಧಾನಿ"],["ಕಾ|ವೇ|ರಿ","ಒಂದು ನದಿ"],["ವಿ|ದ್ಯಾ|ರ್ಥಿ","ಶಾಲೆಗೆ ಹೋಗುವವನು"],["ಸೂ|ರ್ಯ","ಹಗಲಿನ ಬೆಳಕು ಕೊಡುವವನು"],["ಮೈ|ಸೂ|ರು","ಅರಮನೆಗಳ ನಗರ"],["ಗ|ಣಿ|ತ","ಲೆಕ್ಕದ ವಿಷಯ"]];
+let WL=[],wi=0,wo=[],sl=[],pl=[];
+function wgo(){WL=shuf(WD).slice(0,5);wi=0;show("wd");wnew()}
+function wnew(){wo=WL[wi][0].split("|");sl=wo.map(()=>null);pl=shuf(wo);$("wm").classList.add("hide");$("wn").classList.add("hide");wdraw()}
+function wdraw(){$("wh").textContent="💡 "+WL[wi][1]+" · "+(wi+1)+"/"+WL.length+" · 🪙 "+S.coins;
+$("sl").innerHTML="";sl.forEach((p,k)=>{const b=document.createElement("button");b.className="tl";b.textContent=p==null?"＿":pl[p];b.onclick=()=>{sl[k]=null;wdraw()};$("sl").appendChild(b)});
+$("pl").innerHTML="";pl.forEach((t,p)=>{const b=document.createElement("button");b.className="tl p";b.textContent=t;
+if(sl.includes(p)){b.disabled=true;b.style.opacity=.25}b.onclick=()=>{const k=sl.indexOf(null);if(k<0)return;sl[k]=p;wdraw();wchk()};$("pl").appendChild(b)})}
+function wchk(){if(sl.includes(null))return;const m=$("wm");m.classList.remove("hide");
+if(sl.map(p=>pl[p]).join("")==wo.join("")){S.coins+=20;S.xp+=10;save();m.textContent="✅ ಸರಿ! +20🪙 +10 XP";$("wn").classList.remove("hide");wdraw()}
+else m.textContent="❌ ತಪ್ಪು. ಅಕ್ಷರ ಒತ್ತಿ ತೆಗೆದು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."}
+function whint(){if($("wn").classList.contains("hide")==false)return;if(!pay(25))return;
+let k=0;while(k<wo.length&&sl[k]!=null&&pl[sl[k]]==wo[k])k++;if(k>=wo.length)return;
+sl[k]=null;let p=pl.findIndex((t,q)=>t==wo[k]&&!sl.includes(q));sl[k]=p;wdraw();wchk()}
+function wskip(){if(!pay(50))return;wnext()}
+function wnext(){wi++;if(wi>=WL.length)home();else wnew()}
+home();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+</script></body></html>
