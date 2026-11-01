@@ -19,12 +19,14 @@ jobs:
           java-version: 17
       - name: Build APK
         run: |
-          mkdir www
-          cp index.html manifest.json sw.js www/
+          mkdir www resources
+          cp index.html manifest.json sw.js icon-512.png www/
+          cp icon.png resources/icon.png
           npm init -y
-          npm i @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
-          npx cap init "Science Quiz" com.student.quiz --web-dir=www
+          npm i @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets@3
+          npx cap init "Quiz" com.myquiz.app --web-dir=www
           npx cap add android
+          npx capacitor-assets generate --android --iconBackgroundColor "#261469" --iconBackgroundColorDark "#2a1470"
           npx cap sync android
           cd android
           chmod +x gradlew
